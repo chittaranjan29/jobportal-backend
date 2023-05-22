@@ -2,6 +2,7 @@ package org.job.app.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.job.app.model.JobApplication;
 import org.job.app.model.Jobs;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -70,5 +73,19 @@ public class JobApplicationController {
 	{
 		return new ResponseEntity<List<JobApplication>>(this.jobApplicationRepository.findByRecruiter(this.recruiterRepository.findById(recruiterId).get()),HttpStatus.OK);
 	}
-
+	@PutMapping("/status/{id}")
+	public ResponseEntity<?> jobApplicationStatusUpdate(@PathVariable("id")long id, @RequestParam("status")String status)
+	{
+		Optional<JobApplication> application=this.jobApplicationRepository.findById(id);
+		
+		if(application.isPresent())
+		{
+			application.get().setStatus(status);
+			return new ResponseEntity<JobApplication>(this.jobApplicationRepository.save(application.get()),HttpStatus.OK);
+		}
+		else
+		{
+			return new ResponseEntity<String>("Application not found!!",HttpStatus.OK);
+		}
+	}
 }
