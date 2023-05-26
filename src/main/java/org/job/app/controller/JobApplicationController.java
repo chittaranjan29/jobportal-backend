@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.JobApplication;
 import org.job.app.model.Jobs;
 import org.job.app.repository.JobApplicationRepository;
@@ -54,10 +55,18 @@ public class JobApplicationController {
 		{
 			jobApplication.setJob(this.jobsRepository.findById(jobId).get());
 		}
+		else
+		{
+			throw new ResourceNotFoundException("job", "id", jobId);
+		}
 		
 		if(this.jobSeekerRepository.findById(jobseekerId).isPresent())
 		{
 			jobApplication.setJobSeeker(this.jobSeekerRepository.findById(jobseekerId).get());
+		}
+		else
+		{
+			throw new ResourceNotFoundException("job seeker", "id", jobseekerId);
 		}
 		return new ResponseEntity<JobApplication>(this.jobApplicationRepository.save(jobApplication),HttpStatus.CREATED);
 	}
@@ -73,17 +82,17 @@ public class JobApplicationController {
 	{
 		return new ResponseEntity<List<JobApplication>>(this.jobApplicationRepository.findByRecruiter(this.recruiterRepository.findById(recruiterId).get()),HttpStatus.OK);
 	}
-	@PutMapping("/status/{id}")
-	public ResponseEntity<?> jobApplicationStatusUpdate(@PathVariable("id")long id, @RequestParam("status")String status)
+	@PutMapping("/state")
+	public ResponseEntity<?> jobApplicationStatusUpdate(@RequestParam("id")String id, @RequestParam("status")String status)
 	{
-		Optional<JobApplication> application=this.jobApplicationRepository.findById(id);
-		
+		Optional<JobApplication> application=this.jobApplicationRepository.findById(Long.parseLong(id));
+		System.out.println(id+" "+status);
 		if(application.isPresent())
 		{
 			application.get().setStatus(status);
 			return new ResponseEntity<JobApplication>(this.jobApplicationRepository.save(application.get()),HttpStatus.OK);
 		}
-		else
+		else 
 		{
 			return new ResponseEntity<String>("Application not found!!",HttpStatus.OK);
 		}

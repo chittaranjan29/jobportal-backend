@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.Category;
 import org.job.app.model.Jobs;
 import org.job.app.model.Recruiter;
@@ -90,31 +91,32 @@ public class JobController {
 	@GetMapping("/{jobId}")
 	public ResponseEntity<Jobs> getJob(@PathVariable long jobId)
 	{
-		return new ResponseEntity<Jobs>(this.jobRepo.findById(jobId).get(), HttpStatus.OK);
+		Jobs job=this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+		return new ResponseEntity<Jobs>(job, HttpStatus.OK);
 	}
 	
 	@GetMapping("/category/{categoryId}")
 	public ResponseEntity<List<Jobs>> getJobsByCategory(@PathVariable long categoryId)
 	{
-		Optional<Category> category=this.categoryRepository.findById(categoryId);
+		Category category=this.categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
 		
-		return new ResponseEntity<List<Jobs>>(this.jobRepo.findByCategory(category.get()), HttpStatus.OK);
+		return new ResponseEntity<List<Jobs>>(this.jobRepo.findByCategory(category), HttpStatus.OK);
 	
 	}
 	
 	@GetMapping("/recruiter/{recruiterId}")
 	public ResponseEntity<List<Jobs>> getJobsByRecruiter(@PathVariable Long recruiterId)
 	{
-		Optional<Recruiter> recruiter=this.recruiterRepository.findById(recruiterId);
+		Recruiter recruiter=this.recruiterRepository.findById(recruiterId).orElseThrow(() -> new ResourceNotFoundException("Recruiter", "id", recruiterId));;;
 		
-		return new ResponseEntity<List<Jobs>>(this.jobRepo.findByRecruiter(recruiter.get()), HttpStatus.OK);
+		return new ResponseEntity<List<Jobs>>(this.jobRepo.findByRecruiter(recruiter), HttpStatus.OK);
 	
 	}
 	
-	@PutMapping("/status/{id}")
-	public ResponseEntity<?> jobStatusUpdate(@PathVariable("id")long id, @RequestParam("status")String status)
+	@PutMapping("/status")
+	public ResponseEntity<?> jobStatusUpdate(@RequestParam("id")String id, @RequestParam("status")String status)
 	{
-		Optional<Jobs> job=this.jobRepo.findById(id);
+		Optional<Jobs> job=this.jobRepo.findById(Long.parseLong(id));
 		
 		if(job.isPresent())
 		{

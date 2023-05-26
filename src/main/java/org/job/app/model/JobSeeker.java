@@ -38,6 +38,7 @@ public class JobSeeker {
 	
 	@Lob
     private byte[] image;
+	
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "JobSeeker_roles",
         joinColumns = @JoinColumn(name = "JobSeeker_id", referencedColumnName = "id"),

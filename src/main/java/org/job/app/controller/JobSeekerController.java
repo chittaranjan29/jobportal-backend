@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.job.app.dto.LoginDto;
 import org.job.app.dto.SignUpDto;
+import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.JobSeeker;
 import org.job.app.model.Recruiter;
 import org.job.app.model.Role;
@@ -109,14 +110,15 @@ public class JobSeekerController {
     @GetMapping("/{id}")
     public ResponseEntity<JobSeeker> getJobSeekerById(@PathVariable long id)
     {
-    	return new  ResponseEntity<JobSeeker>(this.jobSeekerRepository.findById(id).get(),HttpStatus.OK);
+    	JobSeeker jobSeeker=this.jobSeekerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job Seeker", "id", id));
+    	return new  ResponseEntity<JobSeeker>(jobSeeker,HttpStatus.OK);
     }
     
     @PutMapping("/profile/picture/{jobseekerId}")
     public ResponseEntity<JobSeeker>updateProfilePic(@RequestParam("image") MultipartFile image,@PathVariable long jobseekerId )
     {
     	
-    		JobSeeker obj=this.jobSeekerRepository.findById(jobseekerId).get();
+    	JobSeeker obj=this.jobSeekerRepository.findById(jobseekerId).orElseThrow(() -> new ResourceNotFoundException("Job Seeker", "id", jobseekerId));
     		try 
     		{
 				obj.setImage(image.getBytes());
@@ -133,7 +135,7 @@ public class JobSeekerController {
     public ResponseEntity<JobSeeker>updateCv(@RequestParam("resume") MultipartFile image,@PathVariable long jobseekerId )
     {
     	
-    		JobSeeker obj=this.jobSeekerRepository.findById(jobseekerId).get();
+    	JobSeeker obj=this.jobSeekerRepository.findById(jobseekerId).orElseThrow(() -> new ResourceNotFoundException("Job Seeker", "id", jobseekerId));
     		try 
     		{
 				obj.setImage(image.getBytes());
