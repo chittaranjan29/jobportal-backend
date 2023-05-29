@@ -2,7 +2,7 @@ package org.job.app.controller;
 
 import org.job.app.dto.LoginDto;
 import org.job.app.dto.RecruiterDTO;
-import org.job.app.dto.SignUpDto;
+import org.job.app.dto.JobSeekerDto;
 import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.JobSeeker;
 import org.job.app.model.Recruiter;
@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 @CrossOrigin(origins = "http://localhost:4200/")
 @RestController
 @RequestMapping("/api/auth/recruiter/")
@@ -60,7 +62,7 @@ public class RecruiterController {
     private BCryptPasswordEncoder bCryptPasswordEncoder; 
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginDto loginDto){
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginDto loginDto){
     	Map<String, String> response=new HashMap<>();
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(), loginDto.getPassword()));
@@ -72,7 +74,7 @@ public class RecruiterController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
+    public ResponseEntity<?> registerUser(@Valid @RequestBody JobSeekerDto signUpDto){
     	Map<String, String> response=new HashMap<>();
         // add check for username exists in a DB
         if(userRepository.existsByUsername(signUpDto.getUsername())){
@@ -111,7 +113,7 @@ public class RecruiterController {
     }
     
     @PutMapping("/profile/update/{recruiterId}")
-    public ResponseEntity<?> profileUpdate(@RequestBody RecruiterDTO recruiter,@PathVariable("recruiterId") long recruiterId )
+    public ResponseEntity<?> profileUpdate(@Valid @RequestBody RecruiterDTO recruiter,@PathVariable("recruiterId") long recruiterId )
     {
     	Optional<Recruiter> recruiterDBObj=this.userRepository.findById(recruiterId);
     	

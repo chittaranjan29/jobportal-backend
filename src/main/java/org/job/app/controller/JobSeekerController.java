@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.job.app.dto.LoginDto;
-import org.job.app.dto.SignUpDto;
+import org.job.app.dto.JobSeekerDto;
 import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.JobSeeker;
 import org.job.app.model.Recruiter;
@@ -60,7 +62,7 @@ public class JobSeekerController {
     private BCryptPasswordEncoder bCryptPasswordEncoder; 
 
     @PostMapping("signin")
-    public ResponseEntity<Map<String, String>> authenticateUser(@RequestBody LoginDto loginDto){
+    public ResponseEntity<Map<String, String>> authenticateUser(@Valid @RequestBody LoginDto loginDto){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(), loginDto.getPassword()));
 
@@ -72,7 +74,7 @@ public class JobSeekerController {
     }
 
     @PostMapping("signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
+    public ResponseEntity<?> registerUser(@Valid @RequestBody JobSeekerDto signUpDto){
     	 Map<String, String> response=new HashMap<>();
         // add check for username exists in a DB
         if(jobSeekerRepository.existsByUsername(signUpDto.getUsername())){

@@ -1,10 +1,17 @@
 package org.job.app.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.job.app.exception.ResourceNotFoundException;
 import org.job.app.model.Category;
 import org.job.app.model.Jobs;
@@ -81,6 +88,58 @@ public class JobController {
 		return new ResponseEntity<Jobs>(savedJob,HttpStatus.CREATED);
 	}
 	
+	
+	 private Sort.Direction getSortDirection(String direction) {
+		    if (direction.equals("asc")) {
+		      return Sort.Direction.ASC;
+		    } else if (direction.equals("desc")) {
+		      return Sort.Direction.DESC;
+		    }
+
+		    return Sort.Direction.ASC;
+		  }
+	  @GetMapping("/jobs/pagination")
+	  public ResponseEntity<Map<String, Object>> getAllTutorialsPage(
+	      @RequestParam(required = false) String title,
+	      @RequestParam(defaultValue = "0") int page,
+	      @RequestParam(defaultValue = "3") int size,
+	      @RequestParam(defaultValue = "id,desc") String[] sort) {
+
+	    try {
+	      List<Order> orders = new ArrayList<Order>();
+
+	      if (sort[0].contains(",")) {
+	        // will sort more than 2 fields
+	        // sortOrder="field, direction"
+	        for (String sortOrder : sort) {
+	          String[] _sort = sortOrder.split(",");
+	          orders.add(new Order(getSortDirection(_sort[1]), _sort[0]));
+	        }
+	      } else {
+	        // sort=[field, direction]
+	        orders.add(new Order(getSortDirection(sort[1]), sort[0]));
+	      }
+
+	      List<Jobs> jobs = new ArrayList<Jobs>();
+	      Pageable pagingSort = PageRequest.of(page, size, Sort.by(orders));
+
+	      Page<Jobs> pageJobs;
+	     
+	    	pageJobs = jobRepo.findAll(pagingSort);
+	    
+	      jobs = pageJobs.getContent();
+
+	      Map<String, Object> response = new HashMap<>();
+	      response.put("jobs", jobs);
+	      response.put("currentPage", pageJobs.getNumber());
+	      response.put("totalItems", pageJobs.getTotalElements());
+	      response.put("totalPages", pageJobs.getTotalPages());
+
+	      return new ResponseEntity<>(response, HttpStatus.OK);
+	    } catch (Exception e) {
+	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	  }
 	
 	@GetMapping("/jobs")
 	public ResponseEntity<List<Jobs>> getAllJobs()
